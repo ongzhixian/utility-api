@@ -1,4 +1,11 @@
-# utility-api
+# Utility-API
+
+## Workspace Setup
+
+This project is coupled with 2 repositories.
+
+1.  utility-api (https://github.com/ongzhixian/utility-api)
+2.  utility-www (https://github.com/ongzhixian/utility-www)
 
 ```txt
 Utility (workspace)

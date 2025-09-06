@@ -10,10 +10,14 @@ on:
     branches: [ "main" ]
     paths:
       - 'src/readyperfectly/rsa.py'
+    paths-ignore:
+      - 'README.md' # Ignores changes to the 'README.md' file
   pull_request:
     branches: [ "main" ]
     paths:
       - 'src/readyperfectly/rsa.py'
+    paths-ignore:
+      - 'README.md' # Ignores changes to the 'README.md' file
   workflow_dispatch:
 
 jobs:
