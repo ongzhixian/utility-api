@@ -19,16 +19,13 @@ jobs:
     defaults:
       run:
         shell: pwsh
-    env:
-      FUNCTION_PREFIX: "ut"
-      PROJECT_NAME: "utility-api"
     strategy:
       matrix:
         aws_lambda:
-          - function_name: "${env.FUNCTION_PREFIX}_get_favicon_ico"
+          - function_name: "${{ vars.FUNCTION_PREFIX }}_get_favicon_ico"
             handler: api.get_favicon_ico
             runtime: python3.10
-          - function_name: "${env.FUNCTION_PREFIX}_get_health"
+          - function_name: "${{ vars.FUNCTION_PREFIX }}_get_health"
             handler: api.get_health
             runtime: python3.10
 
