@@ -1,36 +1,66 @@
-# This is a basic workflow to help you get started with Actions
+name: Continuous Integration (all)
 
-name: CI
+# Workflow that deploys AWS Lambda for default functions.
+# Status: Testing
+# Reason: Still trying to think of a better way rather than deploy all the AWS lambda (even if its technically correct approach).
+#         Another thing is that the matrix is currently hardcoded; we want to make it dynamic.
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
+    name: Deploy ${{ matrix.aws_lambda.function_name }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      FUNCTION_PREFIX: "ut"
+      PROJECT_NAME: "utility-api"
+    strategy:
+      matrix:
+        aws_lambda:
+          - function_name: "${FUNCTION_PREFIX}_get_favicon_ico"
+            handler: api.get_favicon_ico
+            runtime: python3.10
+          - function_name: "${FUNCTION_PREFIX}_get_health"
+            handler: api.get_health
+            runtime: python3.10
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: List files (for debugging)
+        run: ls -R
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.3.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Create AWS Lambda Function artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.aws_lambda.function_name }}-package                # Name of the artifact (aws-lambda-package.zip)
+          path: |                                 # Note: Use unix style path (./). Does not work with Windows style path (.\).
+            ${{ vars.LAMBDA_SRC_FOLDER_PATH }}  
+
+      - name: List files (for debugging)
+        run: ls -R
+
+      - name: Deploy ${{ matrix.aws_lambda.function_name }}
+        uses: aws-actions/aws-lambda-deploy@v1
+        with:
+          function-name: ${{ matrix.aws_lambda.function_name }}
+          code-artifacts-dir: ${{ vars.LAMBDA_SRC_FOLDER_PATH }}
+          handler: ${{ matrix.aws_lambda.handler }}
+          runtime: ${{ matrix.aws_lambda.runtime }}
+          role: ${{ vars.AWS_LAMBDA_ROLE_ARN }}
+          tags: '{"environment": "production", "project": "utility-api", "version": "0.1.0"}'
