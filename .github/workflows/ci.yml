@@ -25,10 +25,10 @@ jobs:
     strategy:
       matrix:
         aws_lambda:
-          - function_name: "${FUNCTION_PREFIX}_get_favicon_ico"
+          - function_name: "${{FUNCTION_PREFIX}}_get_favicon_ico"
             handler: api.get_favicon_ico
             runtime: python3.10
-          - function_name: "${FUNCTION_PREFIX}_get_health"
+          - function_name: "${{FUNCTION_PREFIX}}_get_health"
             handler: api.get_health
             runtime: python3.10
 
