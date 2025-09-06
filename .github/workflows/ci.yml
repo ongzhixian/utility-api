@@ -1,4 +1,4 @@
-name: Continuous Integration (all)
+name: Continuous Integration (common)
 
 # Workflow that deploys AWS Lambda for default functions.
 # Status: Testing
